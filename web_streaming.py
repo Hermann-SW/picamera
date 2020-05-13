@@ -1,5 +1,6 @@
 import io
 import picamera
+from picamera import mmal
 import logging
 import socketserver
 from threading import Condition
@@ -79,6 +80,10 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 
 with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
     output = StreamingOutput()
+    camera._camera.control.params[mmal.MMAL_PARAMETER_DRAW_BOX_FACES_AND_FOCUS] = 1
+    mp = camera._camera.control.params[mmal.MMAL_PARAMETER_IMAGE_EFFECT]
+    mp.value = mmal.MMAL_PARAM_IMAGEFX_NEGATIVE
+    camera._camera.control.params[mmal.MMAL_PARAMETER_IMAGE_EFFECT] = mp
     camera.start_recording(output, format='mjpeg')
     try:
         address = ('', 8000)
